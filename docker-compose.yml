@@ -3,11 +3,8 @@ services:
     build: .
     ports:
       - "8000:8000"
-    environment:
-      # Override the default localhost URL to use the docker network alias
-      - MONGODB_URL=mongodb://mongodb:27017
-      - DATABASE_NAME=metadata_db
-      - PYTHONPATH=/app
+    env_file:
+      - .env
     depends_on:
       - mongodb
     # Optional: Mount the app directory for live-reloading during development

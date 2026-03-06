@@ -265,7 +265,7 @@ cp .env.example .env
 
 ### 3. Running with Docker Compose
 
-From the project root:
+Ensure your `.env` has `MONGODB_URL=mongodb://mongodb:27017` (the Docker network hostname). Then from the project root:
 
 ```bash
 docker compose up --build
