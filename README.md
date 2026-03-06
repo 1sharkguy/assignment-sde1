@@ -108,7 +108,7 @@ It was implemented for the **SDE Backend Engineering Hiring Challenge** and is d
 ### Background Worker Flow (Cache Miss)
 
 1. **Client calls** `GET /api/v1/metadata?url=<URL>`.
-2. FastAPI validates `url` as `HttpUrl`, then the service canonicalizes it using `normalize_url` (e.g., collapses duplicate slashes, lowercases host, removes default ports, appends a stable trailing slash for non-root paths).
+2. FastAPI validates `url` as `HttpUrl`, then the service canonicalizes it using `normalize_url` (e.g., collapses duplicate slashes, lowercases host, removes default ports, and preserves a trailing slash for non-root paths when present).
 3. API calls `get_metadata_by_url(canonical_url)`:
    - If **success document exists** (cached metadata):
      - Return `200 OK` with cached metadata (**Immediate Resolution**).
@@ -148,7 +148,7 @@ Subsequent GETs for the same URL will hit the cached metadata and return `200 OK
   - Trim surrounding whitespace.
   - Lowercase scheme and host; strip a trailing dot in the host.
   - Drop default ports (`http:80`, `https:443`).
-  - Normalize path: ensure a leading slash, collapse duplicate slashes, resolve `.`/`..`, and preserve a trailing slash for non-root paths.
+  - Normalize path: ensure a leading slash, collapse duplicate slashes, resolve `.`/`..`, and preserve a trailing slash for non-root paths when present.
   - Canonicalize the query string by parsing, sorting parameters, and re-encoding.
   - Drop URL fragments (the `#...` portion).
 - This ensures that logically equivalent URLs such as `https://linkedin.com`, `https://linkedin.com/`, and `https://linkedin.com//` all map to the same canonical key (e.g., `https://linkedin.com/`) and therefore the same MongoDB document and cache entry.
@@ -432,7 +432,7 @@ pytest
 
 - **Background Worker Pattern**:
   - GET `/metadata` does not call the service itself or block on scraping.
-  - Uses FastAPI’s `BackgroundTasks` to trigger `background_scrape_and_store`.
+  - Schedules in-process background work via `asyncio.create_task` to trigger `background_scrape_and_store`.
   - Satisfies the rubric’s constraint: internal orchestration without external self-HTTP calls.
 
 - **Resilience**:

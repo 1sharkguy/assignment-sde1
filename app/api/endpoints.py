@@ -146,11 +146,6 @@ async def retrieve_metadata(
                     "Retry window passed for url=%s; background task scheduled",
                     url_str,
                 )
-                # Background work is now delegated to a worker (e.g. Celery or in-process task).
-                # For now we reuse the same coroutine directly; this is compatible with BackgroundTasks
-                # or external orchestration.
-                # In this version, we still trigger it asynchronously from the API process.
-                # (Will be wired to Celery in a separate step.)
                 from asyncio import create_task
 
                 create_task(background_scrape_and_store(url_str))
